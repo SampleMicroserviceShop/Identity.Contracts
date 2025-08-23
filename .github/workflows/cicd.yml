@@ -19,6 +19,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         INITIAL_VERSION: 1.0.2
         DEFAULT_BUMP: patch
+    permissions:
+      contents: write
     outputs:
       new_version: ${{ steps.tag_bump.outputs.new_tag }}
           
