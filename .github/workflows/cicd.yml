@@ -28,11 +28,20 @@ jobs:
 
     runs-on: ubuntu-latest
     needs: generate-version
+    permissions:
+      contents: read
+      packages: write
     steps:
     - uses: actions/checkout@v4
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 9.0.x
+        source-url: https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json
+      env:
+        NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+
     - name: Pack
       run: dotnet pack --configuration Release -p:RepositoryUrl=https://github.com/${{ github.repository_owner }}/Identity.Contracts -o packages
+    - name: Publish
+      run: dotnet nuget push packages/*.nupkg
