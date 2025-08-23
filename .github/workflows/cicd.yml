@@ -44,4 +44,6 @@ jobs:
     - name: Pack
       run: dotnet pack --configuration Release -p:RepositoryUrl=https://github.com/${{ github.repository_owner }}/Identity.Contracts -o packages
     - name: Publish
-      run: dotnet nuget push packages/*.nupkg
+      env:
+        NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+      run: dotnet nuget push packages/*.nupkg --source "github" --api-key $NUGET_AUTH_TOKEN --skip-duplicate
