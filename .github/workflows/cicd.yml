@@ -39,12 +39,12 @@ jobs:
         dotnet-version: 9.0.x
         source-url: https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json
       env:
-        NUGET_AUTH_TOKEN: ${{ secrets.NUGET_PACKAGE_PUSH  }}
+        NUGET_AUTH_TOKEN: ${{ secrets.NuGetPackagePush  }}
 
     - name: Pack
       run: dotnet pack --configuration Release -p:PackageVersion=${{ needs.generate-version.outputs.new_version }} -p:RepositoryUrl=https://github.com/${{ github.repository_owner }}/Identity.Contracts -o packages
     - name: Publish
-      run: dotnet nuget push packages/*.nupkg --api-key ${{ secrets.NUGET_PACKAGE_PUSH }} --source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json"
+      run: dotnet nuget push packages/*.nupkg --api-key ${{ secrets.NuGetPackagePush }} --source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json"
 
 
 
