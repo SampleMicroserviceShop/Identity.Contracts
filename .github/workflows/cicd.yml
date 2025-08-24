@@ -1,68 +1,53 @@
+# This workflow will build a .NET project
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
+
 name: CICD
 
 on:
   push:
-    branches: [ main ]
+    branches: [ "main" ]
 
 jobs:
+
   generate-version:
     runs-on: ubuntu-latest
-
-    permissions:
-      contents: write    
-
     steps:
-    - uses: actions/checkout@v3   
-    
+    - uses: actions/checkout@v2
     - name: Github Tag Bump
-      id: tab_bump
-      uses: anothrNick/github-tag-action@v1
+      id: tag_bump
+      uses: anothrNick/github-tag-action@1.67.0
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}     
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         INITIAL_VERSION: 1.0.2
         DEFAULT_BUMP: patch
-        
+    permissions:
+      contents: write
     outputs:
-      new_version: ${{ steps.tab_bump.outputs.new_tag }}
-
-  package-and-publish-contracts:
-
+      new_version: ${{ steps.tag_bump.outputs.new_tag }}
+      
+  build-deploy:
     runs-on: ubuntu-latest
     needs: generate-version
-
     permissions:
       contents: read
-      packages: write        
-
+      packages: write
     steps:
-    - uses: actions/checkout@v3
-    
+    - uses: actions/checkout@v4
     - name: Setup .NET
-      uses: actions/setup-dotnet@v3
+      uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 9.0.x
-        source-url: https://nuget.pkg.github.com/${{github.repository_owner}}/index.json
+        source-url: https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json
       env:
-        NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
-        
+        NUGET_AUTH_TOKEN: ${{ secrets.NUGET_PACKAGE_PUSH  }}
+
     - name: Pack
-      run: dotnet pack --configuration Release -p:PackageVersion=${{ needs.generate-version.outputs.new_version }} -p:RepositoryUrl=https://github.com/${{github.repository_owner}}/identity.contracts -o packages
-    - name: Configure NuGet for GitHub
-      run: |
-        cat <<EOF > ./NuGet.Config
-        <?xml version="1.0" encoding="utf-8"?>
-        <configuration>
-        <packageSources>
-        <add key="github" value="https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" />
-        </packageSources>
-        <packageSourceCredentials>
-        <github>
-        <add key="Username" value="${{ github.repository_owner }}" />
-        <add key="ClearTextPassword" value="${{ secrets.GITHUB_TOKEN }}" />
-        </github>
-        </packageSourceCredentials>
-        </configuration>
-        EOF
-    
+      run: dotnet pack --configuration Release -p:PackageVersion=${{ needs.generate-version.outputs.new_version }} -p:RepositoryUrl=https://github.com/${{ github.repository_owner }}/Identity.Contracts -o packages
     - name: Publish
-      run: dotnet nuget push "packages/*.nupkg" --source github --skip-duplicate
+      run: dotnet nuget push packages/*.nupkg --api-key ${{ secrets.NUGET_PACKAGE_PUSH }} --source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json"
+
+
+
+
+
+        
