@@ -47,5 +47,22 @@ jobs:
         
     - name: Pack
       run: dotnet pack --configuration Release -p:PackageVersion=${{ needs.generate-version.outputs.new_version }} -p:RepositoryUrl=https://github.com/${{github.repository_owner}}/identity.contracts -o packages
+    - name: Configure NuGet for GitHub
+      run: |
+        cat <<EOF > ./NuGet.Config
+        <?xml version="1.0" encoding="utf-8"?>
+        <configuration>
+        <packageSources>
+        <add key="github" value="https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" />
+        </packageSources>
+        <packageSourceCredentials>
+        <github>
+        <add key="Username" value="${{ github.repository_owner }}" />
+        <add key="ClearTextPassword" value="${{ secrets.GITHUB_TOKEN }}" />
+        </github>
+        </packageSourceCredentials>
+        </configuration>
+        EOF
+    
     - name: Publish
-      run: dotnet nuget push "packages/*.nupkg" --source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" --api-key ${{ secrets.GITHUB_TOKEN }} --skip-duplicate
+      run: dotnet nuget push "packages/*.nupkg" --source github --api-key ${{ secrets.GITHUB_TOKEN }} --skip-duplicate
