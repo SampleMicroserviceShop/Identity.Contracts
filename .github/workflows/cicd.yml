@@ -42,7 +42,7 @@ jobs:
         NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
 
     - name: Pack
-      run: dotnet pack --configuration Release -p:PackageVersion=${{ needs.generate-version.outputs.new_version }} -p:RepositoryUrl=https://github.com/${{ github.repository_owner }}/Identity.Contracts -o packages
+      run: dotnet pack --configuration Release -p:PackageVersion=${{ needs.generate-version.outputs.new_version }} -o packages
     - name: Publish
       run: dotnet nuget push packages/*.nupkg --api-key ${{ secrets.NuGetPackagePush }} --source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json"
 
