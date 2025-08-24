@@ -7,6 +7,7 @@
 	<PackageDescription>Contracts supported by the Identity microservice.</PackageDescription>
 	<Authors>MH Karami</Authors>
 	<Company>SampleMicroserviceShop</Company>
+	<PackageId>Identity.Contracts</PackageId>
 	<RepositoryUrl>
 		https://github.com/SampleMicroserviceShop/Identity.Contracts
 	</RepositoryUrl>
