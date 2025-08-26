@@ -45,4 +45,12 @@ jobs:
       run: dotnet pack --configuration Release -p:PackageVersion=${{ needs.generate-version.outputs.new_version }} -o packages
     - name: Publish
       run: dotnet nuget push packages/*.nupkg --api-key ${{ secrets.NuGetPackagePush }} --source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json"
-
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: v${{ needs.generate-version.outputs.new_version }} 
+        name: "Identity.Contracts v${{ needs.generate-version.outputs.new_version }} "
+        body: "New release of Identity.Contracts"
+        files: ./packages/*.nupkg
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
